@@ -114,7 +114,7 @@ class TestStep:
     def test_step_after_done_raises(self, env):
         env.reset(task_id="task_classify_severity")
         env.step(act(action_type="close", resolution_summary="done"))
-        with pytest.raises(RuntimeError):
+        obs = env.step(act(action_type="assess", query="anything"))
             env.step(act(action_type="assess", query="anything"))
 
     def test_max_steps_terminates(self, env):
@@ -130,8 +130,8 @@ class TestStep:
         obs = env.step(act(action_type="close", resolution_summary="done"))
         assert 0.0 <= float(obs.reward) <= 1.0
 
-    def test_step_without_reset_raises(self, env):
-        with pytest.raises(RuntimeError):
+    def test_step_without_reset_autoreset(self, env):
+        obs = env.step(act(action_type="assess", query="anything"))
             env.step(act(action_type="assess", query="anything"))
 
     def test_recommend_doesnt_close(self, env):

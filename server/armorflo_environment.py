@@ -98,7 +98,7 @@ class ArmorFloEnvironment(Environment):
         if self._done:
             raise RuntimeError("Episode is done. Call reset() to start a new episode.")
         if self._scenario is None:
-            raise RuntimeError("Call reset() before step().")
+            self.reset()
 
         raw = action.model_dump()
         self._action_history.append(raw)
