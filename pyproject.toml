@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openenv-armorflo"
+version = "1.0.0"
+description = "ArmorFlo — Vulnerability Report Triage environment for OpenEnv"
+requires-python = ">=3.11"
+dependencies = [
+    "openenv-core[core]>=0.2.2",
+    "pydantic>=2.5.0",
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "openai>=1.12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.scripts]
+server = "armorflo.server.app:main"
+
+[tool.setuptools]
+include-package-data = true
+packages = ["armorflo", "armorflo.server"]
+package-dir = { "armorflo" = ".", "armorflo.server" = "server" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
