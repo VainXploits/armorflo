@@ -158,7 +158,7 @@ class ArmorFloEnvironment(Environment):
             applicability_decisions = dict(self._applicability_decisions),
             assess_result   = assess_result,
             score_breakdown = breakdown or {},
-            reward = round(reward, 4),
+            reward = round(max(0.0001, min(0.9999, reward)), 4),
             done   = done,
         )
 
