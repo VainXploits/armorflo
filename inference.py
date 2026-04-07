@@ -196,6 +196,7 @@ def run_episode(
             if isinstance(v, float) and v != 0.0:
                 print(f"    {k}: {v:.3f}")
 
+    final_score = max(0.0001, min(0.9999, final_score))
     print(f"[END] task={task_id} score={final_score:.4f} steps={step_num + 1}", flush=True)
 
     return final_score
