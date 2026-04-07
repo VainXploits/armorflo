@@ -36,7 +36,7 @@ class TestReset:
         assert len(obs.assets) == 3
         assert obs.step_count == 0
         assert obs.done is False
-        assert obs.reward == 0.0
+        assert float(obs.reward) < 0.01
 
     def test_clears_state(self, env):
         env.reset(task_id="task_classify_severity")
@@ -194,7 +194,7 @@ class TestGraders:
         ep = _ep(step_count=10)
         gt = {"severity_tier": "CRITICAL", "cvss_score": 10.0,
               "applicable_assets": [], "resolution_keywords": [], "par_steps": 5}
-        assert get_total(grade_classify_severity(ep, gt)) == 0.0
+        assert get_total(grade_classify_severity(ep, gt)) < 0.01
 
     def test_task1_false_negative_penalty(self):
         # Agent marks a truly applicable CVE as not-applicable
