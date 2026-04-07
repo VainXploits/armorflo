@@ -129,7 +129,7 @@ def run_grader(req: GraderRequest) -> Dict[str, Any]:
     Submit the episode state and receive per-component breakdown + total score.
     """
     try:
-        from graders import GRADERS, get_total
+        from graders import GRADERS, get_total, clamp_breakdown
         from scenarios import ALL_SCENARIOS
     except ImportError:
         from armorflo.graders import GRADERS, get_total
@@ -156,7 +156,7 @@ def run_grader(req: GraderRequest) -> Dict[str, Any]:
         "assets":                  req.assets,
     }
 
-    bd    = grader(episode_state, ground_truth)
+    bd    = clamp_breakdown(grader(episode_state, ground_truth))
     score = max(0.0001, min(0.9999, get_total(bd)))
 
     return {"task_id": req.task_id, "score": score, "breakdown": bd.model_dump()}

@@ -283,3 +283,22 @@ GRADERS = {
 
 def get_total(bd: RewardBreakdown) -> float:
     return getattr(bd, "_task_total", bd.total)
+
+
+def _clamp(v: float) -> float:
+    return round(max(0.0001, min(0.9999, float(v))), 4)
+
+
+def clamp_breakdown(bd):
+    from models import RewardBreakdown
+    return RewardBreakdown(
+        severity_score=_clamp(bd.severity_score),
+        cvss_score_accuracy=_clamp(bd.cvss_score_accuracy),
+        applicability_score=_clamp(bd.applicability_score),
+        remediation_score=_clamp(bd.remediation_score),
+        escalation_score=_clamp(bd.escalation_score),
+        summary_quality=_clamp(bd.summary_quality),
+        efficiency_bonus=_clamp(bd.efficiency_bonus),
+        loop_penalty=_clamp(bd.loop_penalty),
+        false_positive_penalty=_clamp(bd.false_positive_penalty),
+    )
