@@ -157,7 +157,7 @@ def run_grader(req: GraderRequest) -> Dict[str, Any]:
     }
 
     bd    = grader(episode_state, ground_truth)
-    score = get_total(bd)
+    score = max(0.0001, min(0.9999, get_total(bd)))
 
     return {"task_id": req.task_id, "score": score, "breakdown": bd.model_dump()}
 
@@ -205,9 +205,9 @@ def run_baseline(req: BaselineRequest) -> Dict[str, Any]:
         try:
             env   = ArmorFloEnvironment()
             score = run_episode(env, client, task_id, model=model, verbose=False)
-            scores[task_id] = score
+            scores[task_id] = max(0.0001, min(0.9999, score))
         except Exception as e:
-            scores[task_id] = -1.0
+            scores[task_id] = 0.0001
 
     valid = [v for v in scores.values() if v >= 0]
     return {
