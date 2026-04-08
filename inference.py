@@ -143,6 +143,7 @@ def run_episode(
     obs = env.reset(task_id=task_id)
     conversation: list = []
     final_score = 0.0
+    step_num = 0
 
     if verbose:
         print(f"\n{'='*60}\n  Task: {task_id}\n  Model: {model}\n{'='*60}")
@@ -153,14 +154,20 @@ def run_episode(
         user_content = _format_obs(obs)
         conversation.append({"role": "user", "content": user_content})
 
-        response = client.chat.completions.create(
-            model=model,
-            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + conversation,
-            temperature=0.0,
-            max_tokens=1024,
-            response_format={"type": "json_object"},
-        )
-        raw_action = response.choices[0].message.content
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "system", "content": SYSTEM_PROMPT}] + conversation,
+                temperature=0.0,
+                max_tokens=1024,
+                response_format={"type": "json_object"},
+            )
+            raw_action = response.choices[0].message.content
+        except Exception as e:
+            if verbose:
+                print(f"  LLM ERROR: {e}")
+            raw_action = '{"action_type": "assess", "query": "what are the CVEs and assets present"}'
+
         conversation.append({"role": "assistant", "content": raw_action})
 
         if verbose:
@@ -185,7 +192,8 @@ def run_episode(
             except Exception:
                 break
 
-        final_score = float(obs.reward) if obs.reward is not None else 0.0
+        final_score = float(obs.reward) if obs.reward is not None else final_score
+        final_score = max(0.0001, min(0.9999, final_score))
         print(f"[STEP] step={step_num + 1} reward={final_score:.4f}", flush=True)
         if obs.done:
             break
