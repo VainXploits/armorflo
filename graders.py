@@ -156,7 +156,7 @@ def _false_positive_penalty(
 
 
 def _set_total(bd: RewardBreakdown, raw: float) -> RewardBreakdown:
-    object.__setattr__(bd, "_task_total", max(0.0, min(1.0, round(raw, 4))))
+    object.__setattr__(bd, "_task_total", max(0.001, min(0.999, round(raw, 4))))
     return bd
 
 
@@ -186,10 +186,10 @@ def grade_classify_severity(
     loop = _loop_penalty(history)
 
     raw = sev * 0.40 + cvss * 0.20 + app * 0.20 + summ * 0.10 + eff - loop - fp
-    return _set_total(RewardBreakdown(
+    return _set_total(clamp_breakdown(RewardBreakdown(
         severity_score=sev, cvss_score_accuracy=cvss, applicability_score=app,
         summary_quality=summ, efficiency_bonus=eff, loop_penalty=loop, false_positive_penalty=fp,
-    ), raw)
+    )), raw)
 
 
 def grade_mixed_applicability(
@@ -228,11 +228,11 @@ def grade_mixed_applicability(
     loop = _loop_penalty(history)
 
     raw = app * 0.30 + rem * 0.25 + sev_avg * 0.15 + esc * 0.15 + summ * 0.10 + eff - loop - fp
-    return _set_total(RewardBreakdown(
+    return _set_total(clamp_breakdown(RewardBreakdown(
         severity_score=sev_avg, applicability_score=app, remediation_score=rem,
         escalation_score=esc, summary_quality=summ, efficiency_bonus=eff,
         loop_penalty=loop, false_positive_penalty=fp,
-    ), raw)
+    )), raw)
 
 
 def grade_full_triage(
@@ -267,11 +267,11 @@ def grade_full_triage(
     loop = _loop_penalty(history)
 
     raw = app * 0.25 + rem * 0.25 + sev_avg * 0.15 + esc * 0.15 + summ * 0.15 + eff - loop - fp
-    return _set_total(RewardBreakdown(
+    return _set_total(clamp_breakdown(RewardBreakdown(
         severity_score=sev_avg, applicability_score=app, remediation_score=rem,
         escalation_score=esc, summary_quality=summ, efficiency_bonus=eff,
         loop_penalty=loop, false_positive_penalty=fp,
-    ), raw)
+    )), raw)
 
 
 GRADERS = {
@@ -281,16 +281,11 @@ GRADERS = {
 }
 
 
-def get_total(bd: RewardBreakdown) -> float:
-    return getattr(bd, "_task_total", bd.total)
-
-
 def _clamp(v: float) -> float:
     return round(max(0.0001, min(0.9999, float(v))), 4)
 
 
-def clamp_breakdown(bd):
-    from models import RewardBreakdown
+def clamp_breakdown(bd: RewardBreakdown) -> RewardBreakdown:
     return RewardBreakdown(
         severity_score=_clamp(bd.severity_score),
         cvss_score_accuracy=_clamp(bd.cvss_score_accuracy),
@@ -299,6 +294,10 @@ def clamp_breakdown(bd):
         escalation_score=_clamp(bd.escalation_score),
         summary_quality=_clamp(bd.summary_quality),
         efficiency_bonus=_clamp(bd.efficiency_bonus),
-        loop_penalty=_clamp(bd.loop_penalty),
-        false_positive_penalty=_clamp(bd.false_positive_penalty),
+        loop_penalty=round(max(0.0001, min(0.9999, bd.loop_penalty)), 4),
+        false_positive_penalty=round(max(0.0001, min(0.9999, bd.false_positive_penalty)), 4),
     )
+
+
+def get_total(bd: RewardBreakdown) -> float:
+    return getattr(bd, "_task_total", bd.total)

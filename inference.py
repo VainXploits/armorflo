@@ -236,7 +236,7 @@ def main() -> None:
             )
         except Exception as e:
             print(f"  FAILED {task_id}: {e}")
-            scores[task_id] = 0.0
+            scores[task_id] = 0.001
 
     print(f"\n{'='*60}")
     print(f"  ARMORFLO BASELINE RESULTS  (model: {model})")
